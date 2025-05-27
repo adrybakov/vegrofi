@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "vegrofi"
+dynamic = ["version"]
+description = "Verification tool for the GROGU's spin Hamiltonian file."
+authors = [{ name = "Andrey Rybakov", email = "rybakov.ad@icloud.com" }]
+dependencies = ["termcolor"]
+requires-python = ">=3.9"
+readme = "README.rst"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Science/Research',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Intended Audience :: End Users/Desktop',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3 :: Only',
+    'Topic :: Software Development',
+    'Topic :: Scientific/Engineering',
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+vegrofi = "vegrofi.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/adrybakov/vegrofi.git"
+Repository = "https://github.com/adrybakov/vegrofi.git"
+
+[tool.setuptools.dynamic]
+version = { attr = "vegrofi.__version__" }
