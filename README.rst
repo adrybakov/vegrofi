@@ -4,12 +4,24 @@ Verificator for GROGU spin Hamiltonian file
 
 To verify the spin Hamiltonian file:
 
-* Install the tool::
+*   (optional) Create virtual environment
 
-    pip install vegrofi
+    .. code-block:: bash
+        python3.13 -m venv .venv
+
+*   (optional) Activate virtual environment
+
+    .. code-block:: bash
+        source .venv/bin/activate
+
+* Install the tool
+
+    .. code-block:: bash
+        pip install vegrofi
 
 * Run the Verificator
 
-    vegrofi <filename>
+    .. code-block:: bash
+        vegrofi <filename>
 
 * Enjoy
