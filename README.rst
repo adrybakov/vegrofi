@@ -6,22 +6,27 @@ To verify the spin Hamiltonian file:
 
 *   (optional) Create virtual environment
 
-    .. code-block:: bash
+    .. code-block:: console
+
         python3.13 -m venv .venv
+    
 
 *   (optional) Activate virtual environment
 
-    .. code-block:: bash
+    .. code-block:: console
+
         source .venv/bin/activate
 
-* Install the tool
+*   Install the tool
 
-    .. code-block:: bash
+    .. code-block:: console
+
         pip install vegrofi
 
-* Run the Verificator
+*   Run the Verificator
 
-    .. code-block:: bash
+    .. code-block:: console
+
         vegrofi <filename>
 
 * Enjoy
