@@ -19,4 +19,4 @@
 
 
 __version__ = "0.0.1"
-__release_date__ = "27 May 2025"
+__release_date__ = "28 May 2025"
