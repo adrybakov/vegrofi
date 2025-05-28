@@ -122,15 +122,18 @@ def check_cell(lines, i, error_messages):
 
 
 def check_magnetic_sites(lines, i, error_messages):
+    i_zero = i
+
     if len(lines) <= i + 2:
         error_messages.append(
             f"Expected at least two lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
-        return i
+        return i, None
 
     i += 1
     line = lines[i].split()
+    M = None
     if (
         len(line) < 4
         or line[0].lower() != "number"
@@ -141,16 +144,72 @@ def check_magnetic_sites(lines, i, error_messages):
             f'Line {i+1}: Expected "Number of sites" followed by a single integer '
             f'(with at least one space between each pair of words), got "{lines[i]}".'
         )
+    else:
+        try:
+            M = int(line[3])
+        except:
+            error_messages.append(
+                f'Line {i+1}: Expected "Number of sites" followed by a single integer '
+                f'(with at least one space between each pair of words), got "{lines[i]}".'
+            )
 
-    try:
-        float(line[3])
-    except:
+    i += 1
+    line = lines[i].split()
+    if (
+        len(line) < 11
+        or line[0].lower() != "name"
+        or line[1].lower() != "x"
+        or line[2].lower() != "(ang)"
+        or line[3].lower() != "y"
+        or line[4].lower() != "(ang)"
+        or line[5].lower() != "z"
+        or line[6].lower() != "(ang)"
+        or line[7].lower() != "s"
+        or line[8].lower() != "sx"
+        or line[9].lower() != "sy"
+        or line[10].lower() != "sz"
+    ):
         error_messages.append(
-            f'Line {i+1}: Expected "Number of sites" followed by a single integer '
+            f'Line {i+1}: Expected "Name x (Ang) y (Ang) z (Ang) s sx sy sz" '
             f'(with at least one space between each pair of words), got "{lines[i]}".'
         )
 
-    return i
+    if M is None:
+        return i, None
+    elif len(lines) <= i + M:
+        error_messages.append(
+            f"Expected at least {M} lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i, None
+
+    names = []
+    for _ in range(M):
+        i += 1
+        line = lines[i].split()
+        if len(line) < 8:
+            error_messages.append(
+                f"Line {i+1}: Expected one string and seven numbers, separated by at "
+                f'least one space symbol, got "{lines[i]}".'
+            )
+        else:
+            names.append(line[0])
+            try:
+                for j in range(1, 8):
+                    float(line[j])
+            except:
+                error_messages.append(
+                    f"Line {i+1}: Expected one string and seven numbers, separated by at "
+                    f'least one space symbol, got "{lines[i]}".'
+                )
+    if len(names) != M:
+        return i, None
+
+    if len(names) != len(set(names)):
+        error_messages.append(
+            f"Lines {i_zero+1}-{i+1}: Names of the magnetic sites are not unique."
+        )
+    return i, names
 
 
 def check_file(filename):
@@ -165,6 +224,7 @@ def check_file(filename):
         lines = f.readlines()
 
     i = 0
+    names = None
     while i < len(lines):
         if "Hamiltonian convention" in lines[i]:
             found_convention = True
@@ -176,7 +236,9 @@ def check_file(filename):
 
         if "Magnetic sites" in lines[i]:
             found_sites = True
-            i = check_magnetic_sites(i=i, lines=lines, error_messages=error_messages)
+            i, names = check_magnetic_sites(
+                i=i, lines=lines, error_messages=error_messages
+            )
         if "Intra-atomic anisotropy tensor (meV)" in lines[i]:
             found_intra_atomic = True
         if "Exchange tensor (meV)" in lines[i]:
