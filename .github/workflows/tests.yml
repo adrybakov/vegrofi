@@ -30,4 +30,4 @@ jobs:
       run: pip install .
 
     - name: Run unit tests
-      run: make test
+      run: pytest -s tests
