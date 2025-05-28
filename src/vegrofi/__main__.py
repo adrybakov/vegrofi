@@ -31,10 +31,30 @@ class FileIsNotValid(Exception):
         super().__init__(message)
 
 
-def check_convention(lines, i, error_messages):
-    if len(lines) <= i + 4:
+def check_separator(lines, i, error_messages):
+    line = lines[i].split()
+
+    if len(line) != 1 or not set(line[0].split("=")) == {""}:
         error_messages.append(
-            f"Expected  four lines after the line {i+1}, "
+            f"Line {i+1}: Expected section separator, i.e. line that consist of "
+            f'approximately 80 "=" symbols, got "{lines[i]}".'
+        )
+
+
+def check_subseparator(lines, i, error_messages):
+    line = lines[i].split()
+
+    if len(line) != 1 or not set(line[0].split("-")) == {""}:
+        error_messages.append(
+            f"Line {i+1}: Expected subsection separator, i.e. line that consist of "
+            f'approximately 40 "-" symbols, got "{lines[i]}".'
+        )
+
+
+def check_convention(lines, i, error_messages):
+    if len(lines) <= i + 5:
+        error_messages.append(
+            f"Expected  five lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
         return i
@@ -91,13 +111,15 @@ def check_convention(lines, i, error_messages):
             f'between each pair of words), got "{lines[i]}".'
         )
 
+    i += 1
+    check_separator(lines=lines, i=i, error_messages=error_messages)
     return i
 
 
 def check_cell(lines, i, error_messages):
-    if len(lines) <= i + 3:
+    if len(lines) <= i + 4:
         error_messages.append(
-            f"Expected three lines after the line {i+1}, "
+            f"Expected four lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
         return i
@@ -118,15 +140,17 @@ def check_cell(lines, i, error_messages):
                 f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
             )
 
+    i += 1
+    check_separator(lines=lines, i=i, error_messages=error_messages)
     return i
 
 
 def check_magnetic_sites(lines, i, error_messages):
     i_zero = i
 
-    if len(lines) <= i + 2:
+    if len(lines) <= i + 3:
         error_messages.append(
-            f"Expected at least two lines after the line {i+1}, "
+            f"Expected at least three lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
         return i, None
@@ -176,9 +200,9 @@ def check_magnetic_sites(lines, i, error_messages):
 
     if M is None:
         return i, None
-    elif len(lines) <= i + M:
+    elif len(lines) <= i + M + 1:
         error_messages.append(
-            f"Expected at least {M} lines after the line {i+1}, "
+            f"Expected at least {M+1} lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
         return i, None
@@ -202,6 +226,9 @@ def check_magnetic_sites(lines, i, error_messages):
                     f"Line {i+1}: Expected one string and seven numbers, separated by at "
                     f'least one space symbol, got "{lines[i]}".'
                 )
+    i += 1
+    check_separator(lines=lines, i=i, error_messages=error_messages)
+
     if len(names) != M:
         return i, None
 
@@ -219,15 +246,18 @@ def check_intra_atomic(lines, i, error_messages, names):
             "sites section."
         )
         return i
-    if len(lines) <= i + len(names) * 6:
+    if len(lines) <= i + len(names) * 6 + 1:
         error_messages.append(
-            f"Expected at least {len(names) * 6} lines after the line {i+1}, "
+            f"Expected at least {len(names) * 6+1} lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
         return i
 
+    i += 1
+    check_subseparator(lines=lines, i=i, error_messages=error_messages)
+
     for _ in range(len(names)):
-        i += 2
+        i += 1
         line = lines[i].split()
         if len(line) == 0:
             error_messages.append(
@@ -263,6 +293,141 @@ def check_intra_atomic(lines, i, error_messages, names):
                     f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
                 )
 
+        i += 1
+        check_subseparator(lines=lines, i=i, error_messages=error_messages)
+
+    i += 1
+    check_separator(lines=lines, i=i, error_messages=error_messages)
+    return i
+
+
+def check_exchange(lines, i, error_messages, names):
+    if names is None:
+        error_messages.append(
+            f"Cannot verify Exchange section due to the problems with the Magnetic "
+            "sites section."
+        )
+        return i
+
+    if len(lines) <= i + 4:
+        error_messages.append(
+            f"Expected at least four lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i
+
+    i += 1
+    line = lines[i].split()
+    N = None
+    if (
+        len(line) < 4
+        or line[0].lower() != "number"
+        or line[1].lower() != "of"
+        or line[2].lower() != "pairs"
+    ):
+        error_messages.append(
+            f'Line {i+1}: Expected "Number of pairs" followed by a single integer '
+            f'(with at least one space between each pair of words), got "{lines[i]}".'
+        )
+    else:
+        try:
+            N = int(line[3])
+        except:
+            error_messages.append(
+                f'Line {i+1}: Expected "Number of pairs" followed by a single integer '
+                f'(with at least one space between each pair of words), got "{lines[i]}".'
+            )
+
+    i += 1
+    check_subseparator(lines=lines, i=i, error_messages=error_messages)
+
+    i += 1
+    line = lines[i].split()
+    if (
+        len(line) < 7
+        or line[0].lower() != "name1"
+        or line[1].lower() != "name2"
+        or line[2].lower() != "i"
+        or line[3].lower() != "j"
+        or line[4].lower() != "k"
+        or line[5].lower() != "d"
+        or line[6].lower() != "(ang)"
+    ):
+        error_messages.append(
+            f'Line {i+1}: Expected "Name1 Name2 i j k d  (Ang)" '
+            f'(with at least one space between each pair of words), got "{lines[i]}".'
+        )
+
+    i += 1
+    check_subseparator(lines=lines, i=i, error_messages=error_messages)
+
+    if N is None:
+        return i
+    elif len(lines) <= i + N * 6 + 1:
+        error_messages.append(
+            f"Expected at least {N * 6 + 1} lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i
+
+    for _ in range(N):
+        i += 1
+        line = lines[i].split()
+        if len(line) < 6:
+            error_messages.append(
+                f"Line {i+1}: Expectted two names of the magnetic site, followed by "
+                f'three integers and one float, got "{lines[i]}".'
+            )
+        else:
+            if line[0] not in names:
+                error_messages.append(
+                    f'Line {i+1}: Name of the first atom "{line[0]}" is not present in '
+                    f'the "Magnetic sites" section'
+                )
+            if line[1] not in names:
+                error_messages.append(
+                    f'Line {i+1}: Name of the second atom "{line[1]}" is not present in '
+                    f'the "Magnetic sites" section'
+                )
+
+            try:
+                for j in range(3):
+                    int(line[2 + j])
+                float(line[5])
+            except:
+                error_messages.append(
+                    f"Line {i+1}: Expectted two names of the magnetic site, followed by "
+                    f'three integers and one float, got "{lines[i]}".'
+                )
+
+        i += 1
+        line = lines[i].split()
+        if len(line) == 0 or line[0].lower() != "matrix":
+            error_messages.append(
+                f'Line {i+1}: Expected a keyword "Matrix", got "{lines[i]}".'
+            )
+
+        for _ in range(3):
+            i += 1
+            line = lines[i].split()
+            if len(line) < 3:
+                error_messages.append(
+                    f"Line {i+1}: Expected three numbers separated by at least one space "
+                    f'symbol, got "{lines[i]}".'
+                )
+
+            try:
+                a = list(map(float, line[:3]))
+            except:
+                error_messages.append(
+                    f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+                )
+
+        i += 1
+        check_subseparator(lines=lines, i=i, error_messages=error_messages)
+
+    i += 1
+    check_separator(lines=lines, i=i, error_messages=error_messages)
     return i
 
 
@@ -278,6 +443,7 @@ def check_file(filename):
         lines = f.readlines()
 
     i = 0
+    check_separator(lines=lines, i=0, error_messages=error_messages)
     names = None
     while i < len(lines):
         if "Hamiltonian convention" in lines[i]:
@@ -300,6 +466,9 @@ def check_file(filename):
             )
         if "Exchange tensor (meV)" in lines[i]:
             found_exchange = True
+            i = check_exchange(
+                i=i, lines=lines, error_messages=error_messages, names=names
+            )
 
         i += 1
 
