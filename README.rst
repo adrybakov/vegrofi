@@ -9,7 +9,7 @@ To verify the spin Hamiltonian file:
     .. code-block:: console
 
         python3.13 -m venv .venv
-    
+
 
 *   (optional) Activate virtual environment
 
