@@ -212,6 +212,60 @@ def check_magnetic_sites(lines, i, error_messages):
     return i, names
 
 
+def check_intra_atomic(lines, i, error_messages, names):
+    if names is None:
+        error_messages.append(
+            f"Cannot verify Inra-atomic section due to the problems with the Magnetic "
+            "sites section."
+        )
+        return i
+    if len(lines) <= i + len(names) * 6:
+        error_messages.append(
+            f"Expected at least {len(names) * 6} lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i
+
+    for _ in range(len(names)):
+        i += 2
+        line = lines[i].split()
+        if len(line) == 0:
+            error_messages.append(
+                f"Line {i+1}: Expectted a name of the magnetic site, got nothing."
+            )
+        else:
+            if line[0] not in names:
+                error_messages.append(
+                    f'Line {i+1}: Name of the atom "{line[0]}" is not present in '
+                    f'the "Magnetic sites" section'
+                )
+
+        i += 1
+        line = lines[i].split()
+        if len(line) == 0 or line[0].lower() != "matrix":
+            error_messages.append(
+                f'Line {i+1}: Expected a keyword "Matrix", got "{lines[i]}".'
+            )
+
+        for _ in range(3):
+            i += 1
+            line = lines[i].split()
+            if len(line) < 3:
+                error_messages.append(
+                    f"Line {i+1}: Expected three numbers separated by at least one space "
+                    f'symbol, got "{lines[i]}".'
+                )
+
+            try:
+                a = list(map(float, line[:3]))
+            except:
+                error_messages.append(
+                    f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+                )
+
+    return i
+
+
 def check_file(filename):
     error_messages = []
     found_convention = False
@@ -241,6 +295,9 @@ def check_file(filename):
             )
         if "Intra-atomic anisotropy tensor (meV)" in lines[i]:
             found_intra_atomic = True
+            i = check_intra_atomic(
+                i=i, lines=lines, error_messages=error_messages, names=names
+            )
         if "Exchange tensor (meV)" in lines[i]:
             found_exchange = True
 
