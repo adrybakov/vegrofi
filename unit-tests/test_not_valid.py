@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from vegrofi.__main__ import FileIsNotValid, check_file
+from vegrofi.__main__ import check_file
 
 directory = "file-examples/not-valid"
 files = [os.path.join(directory, filename) for filename in os.listdir(directory)]

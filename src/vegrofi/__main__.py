@@ -26,9 +26,10 @@ from termcolor import colored, cprint
 from vegrofi import __release_date__, __version__
 
 
-class FileIsNotValid(Exception):
-    def __init__(self, message):
-        super().__init__(message)
+def decorate(line):
+    line = line.split("\n")[0]
+
+    return f'\n    "{line}".\n'
 
 
 def check_separator(lines, i, error_messages):
@@ -37,7 +38,7 @@ def check_separator(lines, i, error_messages):
     if len(line) != 1 or not set(line[0].split("=")) == {""}:
         error_messages.append(
             f"Line {i+1}: Expected section separator, i.e. line that consist of "
-            f'approximately 80 "=" symbols, got "{lines[i]}".'
+            f'approximately 80 "=" symbols, got {decorate(lines[i])}'
         )
 
 
@@ -47,7 +48,7 @@ def check_subseparator(lines, i, error_messages):
     if len(line) != 1 or not set(line[0].split("-")) == {""}:
         error_messages.append(
             f"Line {i+1}: Expected subsection separator, i.e. line that consist of "
-            f'approximately 40 "-" symbols, got "{lines[i]}".'
+            f'approximately 40 "-" symbols, got {decorate(lines[i])}'
         )
 
 
@@ -72,7 +73,7 @@ def check_convention(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Double counting true" (with at least one space '
-            f'between each pair of words), got "{lines[i]}".'
+            f"between each pair of words), got {decorate(lines[i])}"
         )
 
     i += 1
@@ -85,7 +86,7 @@ def check_convention(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Normalized spins true" (with at least one space '
-            f'between each pair of words), got "{lines[i]}".'
+            f"between each pair of words), got {decorate(lines[i])}"
         )
 
     i += 1
@@ -98,7 +99,7 @@ def check_convention(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Intra-atomic factor +1" (with at least one space '
-            f'between each pair of words), got "{lines[i]}".'
+            f"between each pair of words), got {decorate(lines[i])}"
         )
 
     i += 1
@@ -111,7 +112,7 @@ def check_convention(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Exchange factor +0.5" (with at least one space '
-            f'between each pair of words), got "{lines[i]}".'
+            f"between each pair of words), got {decorate(lines[i])}"
         )
 
     i += 1
@@ -136,14 +137,14 @@ def check_cell(lines, i, error_messages):
         if len(line) < 3:
             error_messages.append(
                 f"Line {i+1}: Expected three numbers separated by at least one space "
-                f'symbol, got "{lines[i]}".'
+                f"symbol, got {decorate(lines[i])}"
             )
 
         try:
             a = list(map(float, line[:3]))
         except:
             error_messages.append(
-                f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+                f"Line {i+1}: Expected three numbers convertable to floats, got {decorate(lines[i])}"
             )
 
     i += 1
@@ -175,7 +176,7 @@ def check_magnetic_sites(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Number of sites" followed by a single integer '
-            f'(with at least one space between each pair of words), got "{lines[i]}".'
+            f"(with at least one space between each pair of words), got {decorate(lines[i])}"
         )
     else:
         try:
@@ -183,7 +184,7 @@ def check_magnetic_sites(lines, i, error_messages):
         except:
             error_messages.append(
                 f'Line {i+1}: Expected "Number of sites" followed by a single integer '
-                f'(with at least one space between each pair of words), got "{lines[i]}".'
+                f"(with at least one space between each pair of words), got {decorate(lines[i])}"
             )
 
     i += 1
@@ -204,7 +205,7 @@ def check_magnetic_sites(lines, i, error_messages):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Name x (Ang) y (Ang) z (Ang) s sx sy sz" '
-            f'(with at least one space between each pair of words), got "{lines[i]}".'
+            f"(with at least one space between each pair of words), got {decorate(lines[i])}"
         )
 
     if M is None:
@@ -223,7 +224,7 @@ def check_magnetic_sites(lines, i, error_messages):
         if len(line) < 8:
             error_messages.append(
                 f"Line {i+1}: Expected one string and seven numbers, separated by at "
-                f'least one space symbol, got "{lines[i]}".'
+                f"least one space symbol, got {decorate(lines[i])}"
             )
         else:
             names.append(line[0])
@@ -233,7 +234,7 @@ def check_magnetic_sites(lines, i, error_messages):
             except:
                 error_messages.append(
                     f"Line {i+1}: Expected one string and seven numbers, separated by at "
-                    f'least one space symbol, got "{lines[i]}".'
+                    f"least one space symbol, got {decorate(lines[i])}"
                 )
     i += 1
     check_separator(lines=lines, i=i, error_messages=error_messages)
@@ -286,7 +287,7 @@ def check_intra_atomic(lines, i, error_messages, names):
         line = lines[i].split()
         if len(line) == 0 or line[0].lower() != "matrix":
             error_messages.append(
-                f'Line {i+1}: Expected a keyword "Matrix", got "{lines[i]}".'
+                f'Line {i+1}: Expected a keyword "Matrix", got {decorate(lines[i])}'
             )
 
         for _ in range(3):
@@ -295,14 +296,14 @@ def check_intra_atomic(lines, i, error_messages, names):
             if len(line) < 3:
                 error_messages.append(
                     f"Line {i+1}: Expected three numbers separated by at least one space "
-                    f'symbol, got "{lines[i]}".'
+                    f"symbol, got {decorate(lines[i])}"
                 )
 
             try:
                 a = list(map(float, line[:3]))
             except:
                 error_messages.append(
-                    f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+                    f"Line {i+1}: Expected three numbers convertable to floats, got {decorate(lines[i])}"
                 )
 
         i += 1
@@ -342,7 +343,7 @@ def check_exchange(lines, i, error_messages, names):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Number of pairs" followed by a single integer '
-            f'(with at least one space between each pair of words), got "{lines[i]}".'
+            f"(with at least one space between each pair of words), got {decorate(lines[i])}"
         )
     else:
         try:
@@ -350,7 +351,7 @@ def check_exchange(lines, i, error_messages, names):
         except:
             error_messages.append(
                 f'Line {i+1}: Expected "Number of pairs" followed by a single integer '
-                f'(with at least one space between each pair of words), got "{lines[i]}".'
+                f"(with at least one space between each pair of words), got {decorate(lines[i])}"
             )
 
     i += 1
@@ -370,7 +371,7 @@ def check_exchange(lines, i, error_messages, names):
     ):
         error_messages.append(
             f'Line {i+1}: Expected "Name1 Name2 i j k d  (Ang)" '
-            f'(with at least one space between each pair of words), got "{lines[i]}".'
+            f"(with at least one space between each pair of words), got {decorate(lines[i])}"
         )
 
     i += 1
@@ -391,7 +392,7 @@ def check_exchange(lines, i, error_messages, names):
         if len(line) < 6:
             error_messages.append(
                 f"Line {i+1}: Expectted two names of the magnetic site, followed by "
-                f'three integers and one float, got "{lines[i]}".'
+                f"three integers and one float, got {decorate(lines[i])}"
             )
         else:
             if line[0] not in names:
@@ -412,14 +413,14 @@ def check_exchange(lines, i, error_messages, names):
             except:
                 error_messages.append(
                     f"Line {i+1}: Expectted two names of the magnetic site, followed by "
-                    f'three integers and one float, got "{lines[i]}".'
+                    f"three integers and one float, got {decorate(lines[i])}"
                 )
 
         i += 1
         line = lines[i].split()
         if len(line) == 0 or line[0].lower() != "matrix":
             error_messages.append(
-                f'Line {i+1}: Expected a keyword "Matrix", got "{lines[i]}".'
+                f'Line {i+1}: Expected a keyword "Matrix", got {decorate(lines[i])}'
             )
 
         for _ in range(3):
@@ -428,14 +429,14 @@ def check_exchange(lines, i, error_messages, names):
             if len(line) < 3:
                 error_messages.append(
                     f"Line {i+1}: Expected three numbers separated by at least one space "
-                    f'symbol, got "{lines[i]}".'
+                    f"symbol, got {decorate(lines[i])}"
                 )
 
             try:
                 a = list(map(float, line[:3]))
             except:
                 error_messages.append(
-                    f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+                    f"Line {i+1}: Expected three numbers convertable to floats, got {decorate(lines[i])}"
                 )
 
         i += 1
@@ -520,7 +521,11 @@ def check_file(filename):
 def main():
     parser = ArgumentParser()
     parser.add_argument(
-        "filename", type=str, help="File with spin Hamiltonian produced by GROGU."
+        "filenames",
+        metavar="filename1 filename2 ...",
+        type=str,
+        nargs="*",
+        help="Files with spin Hamiltonian produced by GROGU.",
     )
 
     logo = [
@@ -540,22 +545,39 @@ def main():
     ]
     print("\n".join(logo))
 
-    filename = parser.parse_args().filename
+    filenames = parser.parse_args().filenames
 
-    if not os.path.isfile(filename):
-        cprint(f"File {os.path.abspath(filename)} not found.", color="red")
+    ok_files = []
+    not_ok_files = []
+    for filename in filenames:
+        if not os.path.isfile(filename):
+            cprint(f"File {os.path.abspath(filename)} not found.", color="red")
+            sys.exit(1)
+
+        print(f"\n{' Start check ':=^80}")
+        print(f'Checking a file "{os.path.abspath(filename)}"')
+
+        error_messages = check_file(filename=filename)
+
+        if len(error_messages) == 0:
+            ok_files.append(filename)
+            cprint(f"{' It is a valid GROGU file ':=^80}\n", color="green")
+        else:
+            not_ok_files.append(filename)
+            cprint("\n".join(error_messages), color="red")
+            cprint(f"{' It is NOT a valid GROGU file ':=^80}\n", color="red")
+
+    if len(ok_files) == 1:
+        cprint(f"File\n    " + "\n    ".join(ok_files) + "\nis OK", color="green")
+    elif len(ok_files) > 1:
+        cprint(f"Files\n    " + "\n    ".join(ok_files) + "\nare OK", color="green")
+    if len(not_ok_files) == 1:
+        cprint(f"File\n    " + "\n    ".join(not_ok_files) + "\nis NOT OK", color="red")
         sys.exit(1)
-
-    print(f'Checking a file "{os.path.abspath(filename)}"')
-
-    error_messages = check_file(filename=filename)
-
-    if len(error_messages) == 0:
-        cprint("It is a valid GROGU file.", color="green")
-    else:
-        cprint("\n".join(error_messages), color="red")
-        sys.tracebacklimit = 0
-        raise FileIsNotValid("It is NOT a valid GROGU file.")
+    elif len(not_ok_files) > 1:
+        cprint(
+            f"Files\n    " + "\n    ".join(not_ok_files) + "\nare NOT OK", color="red"
+        )
 
 
 if __name__ == "__main__":
