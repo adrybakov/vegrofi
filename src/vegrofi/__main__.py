@@ -52,6 +52,9 @@ def check_subseparator(lines, i, error_messages):
 
 
 def check_convention(lines, i, error_messages):
+    if i > 0:
+        check_separator(lines=lines, i=i - 1, error_messages=error_messages)
+
     if len(lines) <= i + 5:
         error_messages.append(
             f"Expected  five lines after the line {i+1}, "
@@ -117,6 +120,9 @@ def check_convention(lines, i, error_messages):
 
 
 def check_cell(lines, i, error_messages):
+    if i > 0:
+        check_separator(lines=lines, i=i - 1, error_messages=error_messages)
+
     if len(lines) <= i + 4:
         error_messages.append(
             f"Expected four lines after the line {i+1}, "
@@ -146,6 +152,9 @@ def check_cell(lines, i, error_messages):
 
 
 def check_magnetic_sites(lines, i, error_messages):
+    if i > 0:
+        check_separator(lines=lines, i=i - 1, error_messages=error_messages)
+
     i_zero = i
 
     if len(lines) <= i + 3:
@@ -240,6 +249,9 @@ def check_magnetic_sites(lines, i, error_messages):
 
 
 def check_intra_atomic(lines, i, error_messages, names):
+    if i > 0:
+        check_separator(lines=lines, i=i - 1, error_messages=error_messages)
+
     if names is None:
         error_messages.append(
             f"Cannot verify Inra-atomic section due to the problems with the Magnetic "
@@ -302,6 +314,9 @@ def check_intra_atomic(lines, i, error_messages, names):
 
 
 def check_exchange(lines, i, error_messages, names):
+    if i > 0:
+        check_separator(lines=lines, i=i - 1, error_messages=error_messages)
+
     if names is None:
         error_messages.append(
             f"Cannot verify Exchange section due to the problems with the Magnetic "
@@ -455,16 +470,30 @@ def check_file(filename):
             i = check_cell(i=i, lines=lines, error_messages=error_messages)
 
         if "Magnetic sites" in lines[i]:
+            if not found_cell:
+                error_messages.append(
+                    "Expected to find Cell section before Magnetic sites section."
+                )
             found_sites = True
             i, names = check_magnetic_sites(
                 i=i, lines=lines, error_messages=error_messages
             )
         if "Intra-atomic anisotropy tensor (meV)" in lines[i]:
+            if not found_convention or not found_cell or not found_sites:
+                error_messages.append(
+                    "Expected to find Cell, Convention and Magnetic sites sections "
+                    "before Intra-atomic anisotropy section."
+                )
             found_intra_atomic = True
             i = check_intra_atomic(
                 i=i, lines=lines, error_messages=error_messages, names=names
             )
         if "Exchange tensor (meV)" in lines[i]:
+            if not found_convention or not found_cell or not found_sites:
+                error_messages.append(
+                    "Expected to find Cell, Convention and Magnetic sites sections "
+                    "before Exchange section."
+                )
             found_exchange = True
             i = check_exchange(
                 i=i, lines=lines, error_messages=error_messages, names=names
