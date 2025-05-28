@@ -1,0 +1,33 @@
+name: Unit and documentation tests
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version'
+        required: true
+        default: '3.x'
+        type: string
+
+jobs:
+  code:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install package dependencies
+      run: pip install -r requirements.txt
+
+    - name: Install utest dependencies
+      run: pip install -r utest/requirements.txt
+
+    - name: Install the package
+      run: pip install .
+
+    - name: Run unit tests
+      run: make test
