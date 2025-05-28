@@ -121,6 +121,38 @@ def check_cell(lines, i, error_messages):
     return i
 
 
+def check_magnetic_sites(lines, i, error_messages):
+    if len(lines) <= i + 2:
+        error_messages.append(
+            f"Expected at least two lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i
+
+    i += 1
+    line = lines[i].split()
+    if (
+        len(line) < 4
+        or line[0].lower() != "number"
+        or line[1].lower() != "of"
+        or line[2].lower() != "sites"
+    ):
+        error_messages.append(
+            f'Line {i+1}: Expected "Number of sites" followed by a single integer '
+            f'(with at least one space between each pair of words), got "{lines[i]}".'
+        )
+
+    try:
+        float(line[3])
+    except:
+        error_messages.append(
+            f'Line {i+1}: Expected "Number of sites" followed by a single integer '
+            f'(with at least one space between each pair of words), got "{lines[i]}".'
+        )
+
+    return i
+
+
 def check_file(filename):
     error_messages = []
     found_convention = False
@@ -144,6 +176,7 @@ def check_file(filename):
 
         if "Magnetic sites" in lines[i]:
             found_sites = True
+            i = check_magnetic_sites(i=i, lines=lines, error_messages=error_messages)
         if "Intra-atomic anisotropy tensor (meV)" in lines[i]:
             found_intra_atomic = True
         if "Exchange tensor (meV)" in lines[i]:
