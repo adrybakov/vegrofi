@@ -9,6 +9,11 @@ Normalized spins     true
 Intra-atomic factor  +1
 Exchange factor      +0.5
 ===============================================================================
+Cell (Ang)
+1.0 0.0 0.0
+0.0 1.00.0
+0.0 0.0 1.0
+===============================================================================
 Magnetic sites
 Number of sites 1
 Name     x (Ang) y (Ang) z (Ang) s     sx      sy      sz

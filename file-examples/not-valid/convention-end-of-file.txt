@@ -1,0 +1,8 @@
+===============================================================================
+GROGU INFORMATION
+
+Some comments
+===============================================================================
+Hamiltonian convention
+Double counting      true
+Normalized spins     true

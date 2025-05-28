@@ -6,8 +6,13 @@ Some comments
 Hamiltonian convention
 Double counting      true
 Normalized spins     true
-Intra-atomic factor  +1
+Intra-atomic factor+1
 Exchange factor      +0.5
+===============================================================================
+Cell (Ang)
+1.0 0.0 0.0
+0.0 1.0 0.0
+0.0 0.0 1.0
 ===============================================================================
 Magnetic sites
 Number of sites 1

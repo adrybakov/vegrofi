@@ -32,75 +32,91 @@ class FileIsNotValid(Exception):
 
 
 def check_convention(lines, i, error_messages):
-    if i > len(lines) - 5:
+    if len(lines) <= i + 4:
         error_messages.append(
-            f"Expected at least four lines after the line {i+1}, "
+            f"Expected  four lines after the line {i+1}, "
             f"got {len(lines) - i - 1} before the end of file."
         )
+        return i
 
     i += 1
     line = lines[i].split()
-    if len(line) == 0:
+    if (
+        len(line) < 3
+        or line[0].lower() != "double"
+        or line[1].lower() != "counting"
+        or line[2].lower() != "true"
+    ):
         error_messages.append(
-            f"Expected at least two words in line {i+1}, got nothing."
-        )
-    elif line[0].lower() != "double-counting":
-        error_messages.append(
-            f'Expected keyword "Double-counting" in line {i+1}, got "{line[0]}".'
-        )
-    elif len(line) == 1:
-        error_messages.append(f"Expected second word in line {i+1}, got nothing.")
-    elif line[1].lower() != "true":
-        error_messages.append(
-            f'Expected keyword value "true" in line {i+1}, got "{line[1]}".'
-        )
-
-    i += 1
-    line = lines[i].split()
-    if len(line) == 0:
-        error_messages.append(
-            f"Expected at least two words in line {i+1}, got nothing."
-        )
-    elif line[0].lower() != "spin-normalized":
-        error_messages.append(
-            f'Expected keyword "Spin-normalized" in line {i+1}, got "{line[0]}".'
-        )
-    elif len(line) == 1:
-        error_messages.append(f"Expected second word in line {i+1}, got nothing.")
-    elif line[1].lower() != "true":
-        error_messages.append(
-            f'Expected keyword value "true" in line {i+1}, got "{line[1]}".'
+            f'Line {i+1}: Expected "Double counting true" (with at least one space '
+            f'between each pair of words), got "{lines[i]}".'
         )
 
     i += 1
     line = lines[i].split()
-    if len(line) == 0:
+    if (
+        len(line) < 3
+        or line[0].lower() != "normalized"
+        or line[1].lower() != "spins"
+        or line[2].lower() != "true"
+    ):
         error_messages.append(
-            f"Expected at least two words in line {i+1}, got nothing."
+            f'Line {i+1}: Expected "Normalized spins true" (with at least one space '
+            f'between each pair of words), got "{lines[i]}".'
         )
-    elif line[0].lower() != "exchange-factor":
-        error_messages.append(
-            f'Expected keyword "Exchange-factor" in line {i+1}, got "{line[0]}".'
-        )
-    elif len(line) == 1:
-        error_messages.append(f"Expected second word in line {i+1}, got nothing.")
-    elif line[1].lower() != "+0.5":
-        error_messages.append(f'Expected value "+0.5" in line {i+1}, got "{line[1]}".')
 
     i += 1
     line = lines[i].split()
-    if len(line) == 0:
+    if (
+        len(line) < 3
+        or line[0].lower() != "intra-atomic"
+        or line[1].lower() != "factor"
+        or line[2].lower() != "+1"
+    ):
         error_messages.append(
-            f"Expected at least two words in line {i+1}, got nothing."
+            f'Line {i+1}: Expected "Intra-atomic factor +1" (with at least one space '
+            f'between each pair of words), got "{lines[i]}".'
         )
-    elif line[0].lower() != "on-site-factor":
+
+    i += 1
+    line = lines[i].split()
+    if (
+        len(line) < 3
+        or line[0].lower() != "exchange"
+        or line[1].lower() != "factor"
+        or line[2].lower() != "+0.5"
+    ):
         error_messages.append(
-            f'Expected keyword "On-site-factor" in line {i+1}, got "{line[0]}".'
+            f'Line {i+1}: Expected "Exchange factor +0.5" (with at least one space '
+            f'between each pair of words), got "{lines[i]}".'
         )
-    elif len(line) == 1:
-        error_messages.append(f"Expected second word in line {i+1}, got nothing.")
-    elif line[1].lower() != "+1":
-        error_messages.append(f'Expected value "+0.5" in line {i+1}, got "{line[1]}".')
+
+    return i
+
+
+def check_cell(lines, i, error_messages):
+    if len(lines) <= i + 3:
+        error_messages.append(
+            f"Expected three lines after the line {i+1}, "
+            f"got {len(lines) - i - 1} before the end of file."
+        )
+        return i
+
+    for _ in range(3):
+        i += 1
+        line = lines[i].split()
+        if len(line) < 3:
+            error_messages.append(
+                f"Line {i+1}: Expected three numbers separated by at least one space "
+                f'symbol, got "{lines[i]}".'
+            )
+
+        try:
+            a = list(map(float, line[:3]))
+        except:
+            error_messages.append(
+                f'Line {i+1}: Expected three numbers convertable to floats, got "{lines[i]}".'
+            )
 
     return i
 
@@ -110,7 +126,7 @@ def check_file(filename):
     found_convention = False
     found_cell = False
     found_sites = False
-    found_on_site = False
+    found_intra_atomic = False
     found_exchange = False
 
     with open(filename, "r") as f:
@@ -124,26 +140,28 @@ def check_file(filename):
 
         if "Cell (Ang)" in lines[i]:
             found_cell = True
+            i = check_cell(i=i, lines=lines, error_messages=error_messages)
+
         if "Magnetic sites" in lines[i]:
             found_sites = True
-        if "Intra-atomic anisotropy tensor (meV) " in lines[i]:
-            found_on_site = True
+        if "Intra-atomic anisotropy tensor (meV)" in lines[i]:
+            found_intra_atomic = True
         if "Exchange tensor (meV)" in lines[i]:
             found_exchange = True
 
         i += 1
 
-    if found_convention == False:
+    if not found_convention:
         error_messages.append("Section with the convention is not found.")
-    if found_cell == False:
+    if not found_cell:
         error_messages.append("Section with the unit cell is not found.")
-    if found_sites == False:
+    if not found_sites:
         error_messages.append("Section with the magnetic sites is not found.")
-    if found_on_site == False:
+    if not found_intra_atomic:
         error_messages.append(
             "Section with the intra-atomic anisotropy parameters is not found."
         )
-    if found_exchange == False:
+    if not found_exchange:
         error_messages.append("Section with the exchange parameters is not found.")
 
     return error_messages

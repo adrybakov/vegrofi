@@ -4,9 +4,10 @@ GROGU INFORMATION
 Some comments
 ===============================================================================
 Hamiltonian convention
-Double-counting  true
-Spin-normalized  true
-On-site-factor   +1
+true
+Normalized spins     true
+Intra-atomic factor  +1
+Exchange factor      +0.5
 ===============================================================================
 Cell (Ang)
 1.0 0.0 0.0
