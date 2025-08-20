@@ -23,7 +23,7 @@ To verify the spin Hamiltonian file:
 
         pip install vegrofi
 
-*   Run the Verificator
+*   Run the verificator
 
     .. code-block:: console
 
